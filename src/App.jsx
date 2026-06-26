@@ -1,17 +1,61 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './App.css'
 import logoImg from './assets/logo.png'
 
 function App() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('hero')
+  const navLinksRef = useRef(null)
 
+  // Section IDs in page order
+  const sectionIds = ['hero', 'about', 'pillars', 'contact']
+
+  // Scroll detection + navbar shrink
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Intersection Observer for active section tracking
+  useEffect(() => {
+    const visibleSections = new Map()
+
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          visibleSections.set(entry.target.id, entry.intersectionRatio)
+        })
+
+        // Find the section with the highest visibility ratio
+        let maxRatio = 0
+        let mostVisible = 'hero'
+        visibleSections.forEach((ratio, id) => {
+          if (ratio > maxRatio) {
+            maxRatio = ratio
+            mostVisible = id
+          }
+        })
+
+        if (maxRatio > 0) {
+          setActiveSection(mostVisible)
+        }
+      },
+      {
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        rootMargin: '-80px 0px -20% 0px',
+      }
+    )
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) sectionObserver.observe(el)
+    })
+
+    return () => sectionObserver.disconnect()
   }, [])
 
   // Intersection Observer for scroll animations
@@ -42,11 +86,11 @@ function App() {
           <span className="nav-logo-text">Aarunya <span>Sparsha</span> Foundation</span>
         </a>
 
-        <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
-          <a href="#hero" className="active" onClick={() => setMenuOpen(false)}>Home</a>
-          <a href="#about" onClick={() => setMenuOpen(false)}>About Us</a>
-          <a href="#pillars" onClick={() => setMenuOpen(false)}>Programs</a>
-          <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+        <div className={`nav-links ${menuOpen ? 'open' : ''}`} ref={navLinksRef}>
+          <a href="#hero" className={activeSection === 'hero' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Home</a>
+          <a href="#about" className={activeSection === 'about' ? 'active' : ''} onClick={() => setMenuOpen(false)}>About Us</a>
+          <a href="#pillars" className={activeSection === 'pillars' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Programs</a>
+          <a href="#contact" className={activeSection === 'contact' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Contact</a>
         </div>
 
         <button
