@@ -294,7 +294,7 @@ function App() {
                 </div>
                 <div className="contact-item-content">
                   <h4>Phone</h4>
-                  <p>7756920364 / 7387728331</p>
+                  <p>7756920364</p>
                 </div>
               </div>
               <div className="contact-item">
@@ -306,7 +306,7 @@ function App() {
                 </div>
                 <div className="contact-item-content">
                   <h4>Email</h4>
-                  <p>Aarunyasparshafoundation@gmail.com</p>
+                  <p>aarunyasparshafoundation@gmail.com</p>
                 </div>
               </div>
               <div className="contact-item">
@@ -331,7 +331,7 @@ function App() {
                 </div>
                 <div className="contact-item-content">
                   <h4>Instagram</h4>
-                  <p>aarunya_sparsha_foundation</p>
+                  <p><a href="https://www.instagram.com/aarunya_sparsha_foundation" target="_blank" rel="noreferrer">Aarunya Sparsha Foundation</a></p>
                 </div>
               </div>
               <div className="contact-item">
@@ -342,7 +342,7 @@ function App() {
                 </div>
                 <div className="contact-item-content">
                   <h4>Facebook</h4>
-                  <p>Aarunya Sparsha Foundation</p>
+                  <p><a href="https://www.facebook.com/Aarunyasparshafoundation" target="_blank" rel="noreferrer">Aarunya Sparsha Foundation</a></p>
                 </div>
               </div>
             </div>
