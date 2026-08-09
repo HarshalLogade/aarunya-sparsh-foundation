@@ -850,6 +850,12 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.contact-item:hover {
+  opacity: 0.92;
 }
 
 .contact-item-icon {
