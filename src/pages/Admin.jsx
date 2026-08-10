@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { createEventWithImages, getEvents } from '../services/eventService'
+import { createEventWithImages, getEvents, deleteEventAndImages } from '../services/eventService'
 import EditEventForm from './EditEventForm'
 
 const sections = [
@@ -30,6 +30,7 @@ export default function Admin() {
   const [submitting, setSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [editingEventId, setEditingEventId] = useState(null)
+  const [deletingEventId, setDeletingEventId] = useState(null)
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(false)
   const [eventsError, setEventsError] = useState('')
@@ -459,7 +460,32 @@ export default function Admin() {
                                 <div className="admin-event-actions">
                                   <button className="admin-secondary-btn" disabled>View</button>
                                   <button className="admin-secondary-btn" onClick={() => setEditingEventId(ev.id)}>Edit</button>
-                                  <button className="admin-secondary-btn" disabled>Delete</button>
+                                  <button
+                                    className="admin-secondary-btn"
+                                    onClick={async () => {
+                                      if (deletingEventId) return
+                                      const ok = window.confirm('Are you sure you want to delete this event? This will permanently delete the event and all its images.')
+                                      if (!ok) return
+                                      setDeletingEventId(ev.id)
+                                      setStatus('Deleting event...')
+                                      try {
+                                        await deleteEventAndImages(ev.id, (m) => setStatus(m))
+                                        setSuccessMessage('Event deleted successfully.')
+                                        setEventsLoading(true)
+                                        const data = await getEvents()
+                                        setEvents(data)
+                                      } catch (err) {
+                                        setErrors({ submit: err.message || 'Failed to delete event.' })
+                                      } finally {
+                                        setDeletingEventId(null)
+                                        setStatus('')
+                                        setEventsLoading(false)
+                                      }
+                                    }}
+                                    disabled={deletingEventId === ev.id}
+                                  >
+                                    {deletingEventId === ev.id ? 'Deleting…' : 'Delete'}
+                                  </button>
                                 </div>
                               </div>
                             </div>

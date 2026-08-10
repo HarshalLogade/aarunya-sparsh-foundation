@@ -340,3 +340,43 @@ export async function updateEventWithImages({
   onProgress?.('Event updated successfully.')
   return true
 }
+
+export async function deleteEventAndImages(eventId, onProgress) {
+  onProgress?.('Gathering event images...')
+
+  const { data: images, error: imagesError } = await supabase
+    .from('event_images')
+    .select('id, image_url')
+    .eq('event_id', eventId)
+
+  if (imagesError) {
+    throw imagesError
+  }
+
+  // Derive file paths
+  const paths = []
+  for (const img of images || []) {
+    const p = getPathFromPublicUrl(img.image_url)
+    if (!p) {
+      throw new Error('Unable to determine storage path for one or more images; aborting deletion.')
+    }
+    paths.push(p)
+  }
+
+  if (paths.length > 0) {
+    onProgress?.('Deleting files from storage...')
+    const { error: removeErr } = await supabase.storage.from(BUCKET).remove(paths)
+    if (removeErr) {
+      throw removeErr
+    }
+  }
+
+  onProgress?.('Deleting event record...')
+  const { error: delErr } = await supabase.from('events').delete().eq('id', eventId)
+  if (delErr) {
+    throw delErr
+  }
+
+  onProgress?.('Event deleted.')
+  return true
+}
