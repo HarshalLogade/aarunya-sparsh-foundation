@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { createEventWithImages, getEvents } from '../services/eventService'
+import EditEventForm from './EditEventForm'
 
 const sections = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -28,6 +29,7 @@ export default function Admin() {
   const [status, setStatus] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [editingEventId, setEditingEventId] = useState(null)
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(false)
   const [eventsError, setEventsError] = useState('')
@@ -416,30 +418,54 @@ export default function Admin() {
                       <p>No events found. Use the Add Event button to create one.</p>
                     </div>
                   ) : (
-                    <div className="admin-events-list">
-                      {events.map((ev) => (
-                        <div key={ev.id} className="admin-event-card">
-                          {ev.coverImage ? (
-                            <img src={ev.coverImage} alt={ev.title} className="admin-event-cover" />
-                          ) : (
-                            <div className="admin-event-cover admin-event-cover--placeholder">No image</div>
-                          )}
-                          <div className="admin-event-meta">
-                            <h3 className="admin-event-title">{ev.title}</h3>
-                            <p className="admin-event-desc">{ev.description ? (ev.description.length > 140 ? ev.description.slice(0, 140) + '…' : ev.description) : '—'}</p>
-                            <div className="admin-event-info">
-                              <span>{ev.event_date ? new Date(ev.event_date).toLocaleDateString() : 'Date TBD'}</span>
-                              <span>•</span>
-                              <span>{ev.location || 'Location TBD'}</span>
-                            </div>
-                            <div className="admin-event-actions">
-                              <button className="admin-secondary-btn" disabled>View</button>
-                              <button className="admin-secondary-btn" disabled>Edit</button>
-                              <button className="admin-secondary-btn" disabled>Delete</button>
-                            </div>
-                          </div>
+                    <div>
+                      {editingEventId ? (
+                        <div>
+                          <h3 className="admin-panel-title">Edit Event</h3>
+                          <EditEventForm
+                            eventId={editingEventId}
+                            onCancel={() => setEditingEventId(null)}
+                            onSaved={async () => {
+                              setEditingEventId(null)
+                              setEventsLoading(true)
+                              try {
+                                const data = await getEvents()
+                                setEvents(data)
+                              } catch (err) {
+                                setEventsError(err.message || 'Failed to load events.')
+                              } finally {
+                                setEventsLoading(false)
+                              }
+                            }}
+                          />
                         </div>
-                      ))}
+                      ) : (
+                        <div className="admin-events-list">
+                          {events.map((ev) => (
+                            <div key={ev.id} className="admin-event-card">
+                              {ev.coverImage ? (
+                                <img src={ev.coverImage} alt={ev.title} className="admin-event-cover" />
+                              ) : (
+                                <div className="admin-event-cover admin-event-cover--placeholder">No image</div>
+                              )}
+                              <div className="admin-event-meta">
+                                <h3 className="admin-event-title">{ev.title}</h3>
+                                <p className="admin-event-desc">{ev.description ? (ev.description.length > 140 ? ev.description.slice(0, 140) + '…' : ev.description) : '—'}</p>
+                                <div className="admin-event-info">
+                                  <span>{ev.event_date ? new Date(ev.event_date).toLocaleDateString() : 'Date TBD'}</span>
+                                  <span>•</span>
+                                  <span>{ev.location || 'Location TBD'}</span>
+                                </div>
+                                <div className="admin-event-actions">
+                                  <button className="admin-secondary-btn" disabled>View</button>
+                                  <button className="admin-secondary-btn" onClick={() => setEditingEventId(ev.id)}>Edit</button>
+                                  <button className="admin-secondary-btn" disabled>Delete</button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

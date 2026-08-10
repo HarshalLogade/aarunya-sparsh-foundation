@@ -157,3 +157,186 @@ export async function getEvents() {
     }
   })
 }
+
+function getPathFromPublicUrl(publicUrl) {
+  try {
+    const marker = `/storage/v1/object/public/${BUCKET}/`
+    const idx = publicUrl.indexOf(marker)
+    if (idx !== -1) {
+      return publicUrl.slice(idx + marker.length)
+    }
+    // Fallback: try to find the bucket segment
+    const bucketIdx = publicUrl.indexOf(`/${BUCKET}/`)
+    if (bucketIdx !== -1) {
+      return publicUrl.slice(bucketIdx + (`/${BUCKET}/`).length)
+    }
+  } catch (e) {
+    // ignore
+  }
+  return null
+}
+
+export async function getEventById(eventId) {
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id, title, description, event_date, location, created_at')
+    .eq('id', eventId)
+    .single()
+
+  if (eventError) {
+    throw eventError
+  }
+
+  const { data: images, error: imagesError } = await supabase
+    .from('event_images')
+    .select('id, event_id, image_url, display_order, created_at')
+    .eq('event_id', eventId)
+    .order('display_order', { ascending: true })
+
+  if (imagesError) {
+    throw imagesError
+  }
+
+  return {
+    ...event,
+    images: images || [],
+  }
+}
+
+export async function updateEvent(eventId, eventDetails) {
+  const { title, description, event_date, location } = eventDetails
+  const { data, error } = await supabase
+    .from('events')
+    .update({ title, description, event_date, location })
+    .eq('id', eventId)
+    .select('id')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function deleteEventImageRecord(imageId) {
+  const { error } = await supabase.from('event_images').delete().eq('id', imageId)
+  if (error) throw error
+  return true
+}
+
+export async function deleteStorageFileByPublicUrl(publicUrl) {
+  const filePath = getPathFromPublicUrl(publicUrl)
+  if (!filePath) {
+    throw new Error('Unable to determine storage file path from URL')
+  }
+
+  const { error } = await supabase.storage.from(BUCKET).remove([filePath])
+  if (error) throw error
+  return true
+}
+
+export async function updateEventWithImages({
+  eventId,
+  eventDetails,
+  keptExistingImages = [], // array of existing image objects { id, image_url }
+  newImages = [], // array of File
+  cover, // { type: 'existing'|'new', id or index }
+  imagesToDelete = [], // array of existing image ids to delete
+  onProgress,
+}) {
+  onProgress?.('Saving event details...')
+  await updateEvent(eventId, eventDetails)
+
+  // 1) Upload new images first
+  const uploadedNew = []
+  for (let i = 0; i < newImages.length; i += 1) {
+    const file = newImages[i]
+    onProgress?.(`Uploading new image ${i + 1} of ${newImages.length}...`)
+    const upload = await uploadEventImage({ eventId, file, prefix: 'gallery' })
+    uploadedNew.push({ publicUrl: upload.publicUrl, path: upload.path })
+  }
+
+  // 2) Delete removed image records and storage files
+  if (imagesToDelete.length > 0) {
+    onProgress?.('Removing deleted images...')
+    // Fetch the records to get their URLs
+    const { data: toDeleteRows, error: fetchErr } = await supabase
+      .from('event_images')
+      .select('id, image_url')
+      .in('id', imagesToDelete)
+
+    if (fetchErr) {
+      throw fetchErr
+    }
+
+    // Delete DB records in a batch
+    const { error: delErr } = await supabase.from('event_images').delete().in('id', imagesToDelete)
+    if (delErr) throw delErr
+
+    // Delete storage files for each removed image (best-effort)
+    for (const row of toDeleteRows || []) {
+      try {
+        const filePath = getPathFromPublicUrl(row.image_url)
+        if (filePath) {
+          await supabase.storage.from(BUCKET).remove([filePath])
+        }
+      } catch (e) {
+        // Log but don't fail the entire update for storage delete errors
+        // eslint-disable-next-line no-console
+        console.warn('Failed to delete storage file for', row.image_url, e.message)
+      }
+    }
+  }
+
+  // 3) Build final ordered list: cover first, then other kept existing images (preserve order), then new images
+  const finalList = []
+
+  const keptMap = new Map(keptExistingImages.map((im) => [im.id, im]))
+
+  if (cover) {
+    if (cover.type === 'existing') {
+      const ev = keptExistingImages.find((e) => e.id === cover.id)
+      if (ev) finalList.push({ type: 'existing', id: ev.id, image_url: ev.image_url })
+    } else if (cover.type === 'new') {
+      const up = uploadedNew[cover.index]
+      if (up) finalList.push({ type: 'new', image_url: up.publicUrl })
+    }
+  }
+
+  // add other existing kept images (excluding cover)
+  for (const ex of keptExistingImages) {
+    if (finalList.find((f) => f.type === 'existing' && f.id === ex.id)) continue
+    finalList.push({ type: 'existing', id: ex.id, image_url: ex.image_url })
+  }
+
+  // add other new images (exclude cover if already added)
+  for (let i = 0; i < uploadedNew.length; i += 1) {
+    const up = uploadedNew[i]
+    if (cover && cover.type === 'new' && cover.index === i) continue
+    finalList.push({ type: 'new', image_url: up.publicUrl })
+  }
+
+  // 4) Apply display_order updates/inserts
+  onProgress?.('Updating image order...')
+  for (let idx = 0; idx < finalList.length; idx += 1) {
+    const item = finalList[idx]
+    if (item.type === 'existing') {
+      const { error } = await supabase
+        .from('event_images')
+        .update({ display_order: idx })
+        .eq('id', item.id)
+      if (error) throw error
+    } else {
+      const { error } = await supabase.from('event_images').insert({
+        event_id: eventId,
+        image_url: item.image_url,
+        display_order: idx,
+      })
+      if (error) throw error
+    }
+  }
+
+  onProgress?.('Event updated successfully.')
+  return true
+}
