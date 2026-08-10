@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { createEventWithImages, getEvents, deleteEventAndImages } from '../services/eventService'
 import EditEventForm from './EditEventForm'
@@ -31,6 +31,7 @@ export default function Admin() {
   const [successMessage, setSuccessMessage] = useState('')
   const [editingEventId, setEditingEventId] = useState(null)
   const [deletingEventId, setDeletingEventId] = useState(null)
+  const location = useLocation()
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(false)
   const [eventsError, setEventsError] = useState('')
@@ -59,6 +60,17 @@ export default function Admin() {
 
     fetchEvents()
   }, [activeSection])
+
+  useEffect(() => {
+    // If navigated with state to edit a specific event, open the edit form
+    if (location?.state?.editEventId) {
+      setActiveSection('events')
+      setFormVisible(false)
+      setEditingEventId(location.state.editEventId)
+      // Clear the state to avoid reopening on subsequent navigations
+      // Note: cannot directly clear location.state; this is fine for typical navigation flows
+    }
+  }, [location])
 
   const handleLogout = async () => {
     const { error } = await logout()
@@ -458,7 +470,7 @@ export default function Admin() {
                                   <span>{ev.location || 'Location TBD'}</span>
                                 </div>
                                 <div className="admin-event-actions">
-                                  <button className="admin-secondary-btn" disabled>View</button>
+                                  <button className="admin-secondary-btn" onClick={() => navigate(`/admin/events/${ev.id}`)}>View</button>
                                   <button className="admin-secondary-btn" onClick={() => setEditingEventId(ev.id)}>Edit</button>
                                   <button
                                     className="admin-secondary-btn"
