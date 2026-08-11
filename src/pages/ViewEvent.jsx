@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { getEventById, deleteEventAndImages } from '../services/eventService'
 
 export default function ViewEvent() {
-  const { user, loading } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
   const { eventId } = useParams()
   const navigate = useNavigate()
   const [event, setEvent] = useState(null)
@@ -17,8 +17,13 @@ export default function ViewEvent() {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/login', { replace: true })
+      return
     }
-  }, [loading, user, navigate])
+
+    if (!loading && user && !isAdmin) {
+      navigate('/', { replace: true })
+    }
+  }, [loading, user, isAdmin, navigate])
 
   useEffect(() => {
     const load = async () => {
@@ -63,6 +68,10 @@ export default function ViewEvent() {
   if (loadingEvent) return <div className="admin-loading">Loading event...</div>
   if (error) return <div className="admin-field-error">{error}</div>
   if (!event) return <div className="admin-placeholder">Event not found.</div>
+
+  if (!loading && !isAdmin) {
+    return null
+  }
 
   return (
     <div className="admin-shell">

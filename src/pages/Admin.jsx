@@ -13,7 +13,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024
 const VALID_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 export default function Admin() {
-  const { user, loading, logout } = useAuth()
+  const { user, loading, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState('dashboard')
   const [formVisible, setFormVisible] = useState(false)
@@ -39,8 +39,13 @@ export default function Admin() {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/login', { replace: true })
+      return
     }
-  }, [loading, user, navigate])
+
+    if (!loading && user && !isAdmin) {
+      navigate('/', { replace: true })
+    }
+  }, [loading, user, isAdmin, navigate])
 
   useEffect(() => {
     // Fetch events when entering the events section
@@ -194,8 +199,37 @@ export default function Admin() {
     return <div className="admin-loading">Checking authentication...</div>
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     return null
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="admin-shell">
+        <main className="admin-main">
+          <header className="admin-header">
+            <div>
+              <span className="admin-badge">Unauthorized</span>
+              <h1>Access denied</h1>
+              <p className="admin-subtitle">
+                You are signed in, but you do not have permission to access the admin dashboard.
+              </p>
+            </div>
+            <div className="admin-header-actions">
+              <span className="admin-user">{user.email}</span>
+              <button className="admin-logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
+          </header>
+          <section className="admin-content">
+            <div className="admin-panel">
+              <p>Please contact the site administrator if you believe this is an error.</p>
+            </div>
+          </section>
+        </main>
+      </div>
+    )
   }
 
   return (

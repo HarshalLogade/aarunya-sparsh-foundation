@@ -73,12 +73,12 @@ export default function Events() {
     <section className="events-section" id="events">
       <div className="events-inner">
         <div className="events-header animate-in">
-          <span className="section-label">Upcoming</span>
+          <span className="section-label">OUR ACTIVITIES</span>
           <h2 className="section-title">
-            Public <span className="cursive">Events</span>
+            Past <span className="cursive">Events</span>
           </h2>
           <p className="section-desc">
-            Explore our latest events and join the initiatives that are shaping stronger communities.
+            Explore our past events, activities, and initiatives that have brought our community together and created meaningful impact.
           </p>
         </div>
 

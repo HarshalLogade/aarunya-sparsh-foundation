@@ -8,13 +8,17 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { user, loading } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
 
   useEffect(() => {
     if (!loading && user) {
-      navigate('/admin', { replace: true })
+      if (isAdmin) {
+        navigate('/admin', { replace: true })
+      } else {
+        navigate('/', { replace: true })
+      }
     }
-  }, [loading, user, navigate])
+  }, [loading, user, isAdmin, navigate])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -29,8 +33,6 @@ export default function Login() {
       setError(error.message)
       return
     }
-
-    navigate('/admin', { replace: true })
   }
 
   return (
