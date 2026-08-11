@@ -63,6 +63,25 @@ export default function EventDetail() {
   }, [eventId])
 
   useEffect(() => {
+    if (!event) return undefined
+    const prevTitle = document.title
+    const prevMeta = document.querySelector('meta[name="description"]')
+    const prevDescription = prevMeta ? prevMeta.getAttribute('content') : ''
+
+    // Set page title and meta description for SEO
+    document.title = `${event.title} | Aarunya Sparsh Foundation`
+    if (prevMeta) {
+      const shortDesc = (event.description && event.description.length > 156) ? `${event.description.slice(0, 153).trim()}...` : (event.description || '')
+      prevMeta.setAttribute('content', shortDesc)
+    }
+
+    return () => {
+      document.title = prevTitle
+      if (prevMeta) prevMeta.setAttribute('content', prevDescription)
+    }
+  }, [event])
+
+  useEffect(() => {
     if (lightboxIndex < 0) return
 
     const handleKeyDown = (event) => {
