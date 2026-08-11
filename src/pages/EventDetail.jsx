@@ -189,7 +189,7 @@ export default function EventDetail() {
             <div className="event-detail-empty-gallery">No images are available yet.</div>
           ) : (
             <div className="event-gallery-grid">
-              {eventImages.map((image, index) => (
+                {eventImages.map((image, index) => (
                 <button
                   key={image.id || `${index}-${image.image_url}`}
                   className="gallery-image-card"
@@ -197,7 +197,7 @@ export default function EventDetail() {
                   onClick={() => openLightbox(index)}
                   aria-label={`Open gallery image ${index + 1}`}
                 >
-                  <img src={image.image_url} alt={`${event.title} gallery ${index + 1}`} />
+                  <img src={image.image_url} alt={`${event.title} gallery ${index + 1}`} loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>

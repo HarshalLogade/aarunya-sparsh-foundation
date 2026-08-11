@@ -198,7 +198,7 @@ export default function EditEventForm({ eventId, onCancel, onSaved }) {
                 <div className="admin-gallery-preview">
                   {existingImages.map((im, idx) => (
                     <div key={im.id} className="admin-gallery-item">
-                      <img src={im.image_url} alt={`img-${idx}`} style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 6 }} />
+                      <img src={im.image_url} alt={`img-${idx}`} style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 6 }} loading="lazy" decoding="async" />
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <label>
                           <input type="radio" name="cover" checked={cover?.type === 'existing' && cover?.id === im.id} onChange={() => handleSetCoverExisting(im.id)} disabled={im.toDelete || saving} /> Cover
@@ -220,7 +220,7 @@ export default function EditEventForm({ eventId, onCancel, onSaved }) {
                 <div className="admin-gallery-preview">
                   {newFiles.map((file, idx) => (
                     <div key={`${file.name}-${idx}`} className="admin-gallery-item">
-                      <img src={URL.createObjectURL(file)} alt={`new-${idx}`} style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 6 }} />
+                      <img src={URL.createObjectURL(file)} alt={`new-${idx}`} style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 6 }} loading="lazy" decoding="async" />
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <label>
                           <input type="radio" name="cover_new" checked={cover?.type === 'new' && cover?.index === idx} onChange={() => handleSetCoverNew(idx)} disabled={saving} /> Cover

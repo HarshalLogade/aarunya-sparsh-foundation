@@ -98,6 +98,8 @@ export default function Events() {
                       className="event-card-image"
                       src={event.coverImage}
                       alt={event.title}
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="event-card-image event-card-image--placeholder">

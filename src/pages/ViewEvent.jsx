@@ -133,7 +133,7 @@ export default function ViewEvent() {
               <div className="admin-gallery-grid view-event-gallery">
                 {event.images.map((img) => (
                   <button key={img.id} type="button" className="admin-gallery-grid-item" onClick={() => setLightboxSrc(img.image_url)}>
-                    <img src={img.image_url} alt="gallery" />
+                    <img src={img.image_url} alt="gallery" loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>
