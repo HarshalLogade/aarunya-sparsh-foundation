@@ -1,5 +1,6 @@
 import logoImg from '../assets/logo.png'
 import { useState, useEffect, useRef } from 'react'
+import Events from '../components/Events'
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false)
@@ -258,6 +259,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Events />
 
       <section className="contact-section" id="contact">
         <div className="contact-content">

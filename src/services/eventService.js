@@ -113,49 +113,37 @@ export async function createEventWithImages({ eventDetails, coverImage, galleryI
   return { eventId }
 }
 
-export async function getEvents() {
-  // Fetch events ordered by event_date descending (newest first)
+export async function getPublicEvents() {
   const { data: events, error: eventsError } = await supabase
     .from('events')
-    .select('id, title, description, event_date, location, created_at')
+    .select('id, title, description, event_date, location, created_at, event_images(id, event_id, image_url, display_order)')
     .order('event_date', { ascending: false })
 
   if (eventsError) {
-    throw eventsError
+    throw new Error(eventsError.message || 'Failed to fetch events.')
   }
 
   if (!events || events.length === 0) {
     return []
   }
 
-  const eventIds = events.map((e) => e.id)
-
-  const { data: images, error: imagesError } = await supabase
-    .from('event_images')
-    .select('id, event_id, image_url, display_order, created_at')
-    .in('event_id', eventIds)
-    .order('display_order', { ascending: true })
-
-  if (imagesError) {
-    throw imagesError
-  }
-
-  const imagesByEvent = images?.reduce((acc, img) => {
-    const list = acc[img.event_id] || []
-    list.push(img)
-    acc[img.event_id] = list
-    return acc
-  }, {}) || {}
-
-  // Attach images array and cover image (first by display_order) to each event
-  return events.map((ev) => {
-    const evImages = imagesByEvent[ev.id] || []
+  const mappedEvents = events.map((ev) => {
+    const evImages = ev.event_images || []
+    const sortedImages = [...evImages].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    const coverImage = sortedImages.length > 0 ? sortedImages[0].image_url : null
     return {
       ...ev,
-      images: evImages,
-      coverImage: evImages.length > 0 ? evImages[0].image_url : null,
+      images: sortedImages,
+      coverImage,
     }
   })
+
+  return mappedEvents
+}
+
+export async function getEvents() {
+  // Keep a single proven implementation for event fetching used by admin and public consumers.
+  return getPublicEvents()
 }
 
 function getPathFromPublicUrl(publicUrl) {
