@@ -8,7 +8,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState('hero')
   const navLinksRef = useRef(null)
 
-  const sectionIds = ['hero', 'about', 'pillars', 'contact']
+  const sectionIds = ['hero', 'about', 'pillars', 'events', 'contact']
 
   useEffect(() => {
     const handleScroll = () => {
@@ -82,6 +82,19 @@ export default function Home() {
           <a href="#hero" className={activeSection === 'hero' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Home</a>
           <a href="#about" className={activeSection === 'about' ? 'active' : ''} onClick={() => setMenuOpen(false)}>About Us</a>
           <a href="#pillars" className={activeSection === 'pillars' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Programs</a>
+          <a
+            href="#events"
+            className={activeSection === 'events' ? 'active' : ''}
+            onClick={(e) => {
+              e.preventDefault()
+              setMenuOpen(false)
+              const el = document.getElementById('events')
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              else window.location.hash = '#events'
+            }}
+          >
+            Events
+          </a>
           <a href="#contact" className={activeSection === 'contact' ? 'active' : ''} onClick={() => setMenuOpen(false)}>Contact</a>
         </div>
 
