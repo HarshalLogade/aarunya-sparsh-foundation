@@ -158,7 +158,7 @@ function getPathFromPublicUrl(publicUrl) {
     if (bucketIdx !== -1) {
       return publicUrl.slice(bucketIdx + (`/${BUCKET}/`).length)
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
   return null
@@ -269,18 +269,14 @@ export async function updateEventWithImages({
         if (filePath) {
           await supabase.storage.from(BUCKET).remove([filePath])
         }
-      } catch (e) {
-        // Log but don't fail the entire update for storage delete errors
-        // eslint-disable-next-line no-console
-        console.warn('Failed to delete storage file for', row.image_url, e.message)
+      } catch {
+        // Don't fail the entire update for storage delete errors (best-effort)
       }
     }
   }
 
   // 3) Build final ordered list: cover first, then other kept existing images (preserve order), then new images
   const finalList = []
-
-  const keptMap = new Map(keptExistingImages.map((im) => [im.id, im]))
 
   if (cover) {
     if (cover.type === 'existing') {

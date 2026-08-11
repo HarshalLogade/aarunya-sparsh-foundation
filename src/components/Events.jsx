@@ -33,15 +33,13 @@ export default function Events() {
       try {
         setLoading(true)
         setError('')
-        console.log('Public Events: fetching...')
         const data = await getEvents()
-        console.log('Public Events: fetched events', data)
+        
         if (mounted) {
           setEvents(data)
           setPage(0)
         }
       } catch (err) {
-        console.error('Public Events: fetch error', err)
         if (mounted) {
           setError(err.message || 'Failed to load events.')
         }
