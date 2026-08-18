@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -8,7 +8,9 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, loading, isAdmin } = useAuth()
+  const sessionExpired = location.state?.sessionExpired
 
   useEffect(() => {
     if (!loading && user) {
@@ -38,6 +40,10 @@ export default function Login() {
   return (
     <div>
       <h1>Admin Login</h1>
+
+      {sessionExpired && (
+        <p>Your admin session expired. Please sign in again.</p>
+      )}
 
       <form onSubmit={handleLogin}>
         <input

@@ -116,7 +116,10 @@ export default function Events() {
                     <button
                       className="btn-primary event-card-button"
                       type="button"
-                      onClick={() => navigate(`/events/${event.id}`)}
+                      onClick={() => {
+                        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+                        navigate(`/events/${event.id}`)
+                      }}
                     >
                       View Event
                     </button>

@@ -412,7 +412,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="footer-col">
+            {/* <div className="footer-col">
               <h4>Get Involved</h4>
               <ul>
                 <li><a href="#">Join Us</a></li>
@@ -420,7 +420,7 @@ export default function Home() {
                 <li><a href="#">Volunteer</a></li>
                 <li><a href="#">Donate</a></li>
               </ul>
-            </div>
+            </div> */}
           </div>
 
           <div className="footer-bottom">

@@ -15,8 +15,10 @@ const VALID_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 export default function Admin() {
   const { user, loading, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
-  const [activeSection, setActiveSection] = useState('dashboard')
-  const [formVisible, setFormVisible] = useState(false)
+  const location = useLocation()
+  const editEventIdFromLocation = location?.state?.editEventId
+  const [activeSection, setActiveSection] = useState(editEventIdFromLocation ? 'events' : 'dashboard')
+  const [formVisible, setFormVisible] = useState(!editEventIdFromLocation)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -29,9 +31,8 @@ export default function Admin() {
   const [status, setStatus] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
-  const [editingEventId, setEditingEventId] = useState(null)
+  const [editingEventId, setEditingEventId] = useState(editEventIdFromLocation ?? null)
   const [deletingEventId, setDeletingEventId] = useState(null)
-  const location = useLocation()
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(false)
   const [eventsError, setEventsError] = useState('')
@@ -65,17 +66,6 @@ export default function Admin() {
 
     fetchEvents()
   }, [activeSection])
-
-  useEffect(() => {
-    // If navigated with state to edit a specific event, open the edit form
-    if (location?.state?.editEventId) {
-      setActiveSection('events')
-      setFormVisible(false)
-      setEditingEventId(location.state.editEventId)
-      // Clear the state to avoid reopening on subsequent navigations
-      // Note: cannot directly clear location.state; this is fine for typical navigation flows
-    }
-  }, [location])
 
   const handleLogout = async () => {
     const { error } = await logout()

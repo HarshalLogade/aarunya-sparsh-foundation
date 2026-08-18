@@ -9,8 +9,8 @@ import './App.css'
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -19,8 +19,8 @@ function App() {
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
