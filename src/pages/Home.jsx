@@ -112,15 +112,15 @@ export default function Home() {
       <section className="hero-section" id="hero">
         <div className="hero-content">
           <div className="hero-left">
-            <h1 className="hero-title">
+            <h1 className="hero-title" aria-label="Aarunya Sparsha Foundation">
               <span className="hero-title-line">Aarunya</span>
               <span className="hero-title-line"><span className="highlight-orange">Sparsha</span></span>
+              <span className="hero-foundation-divider">
+                <span className="hero-divider-line"></span>
+                <span className="hero-foundation-text">Foundation</span>
+                <span className="hero-divider-line"></span>
+              </span>
             </h1>
-            <div className="hero-foundation-divider">
-              <span className="hero-divider-line"></span>
-              <span className="hero-foundation-text">Foundation</span>
-              <span className="hero-divider-line"></span>
-            </div>
             <span className="hero-title-cursive">Touching Lives, Creating Smiles,<br/>Building a Better Tomorrow. <span className="heart-icon">♡</span></span>
             <p className="hero-desc">
               We are committed to bringing positive change in the lives of people

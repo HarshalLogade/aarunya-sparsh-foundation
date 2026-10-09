@@ -208,6 +208,7 @@
   color: var(--green-800);
   line-height: 0.95;
   margin-bottom: 12px;
+  width: 100%;
 }
 
 .hero-title-line {
@@ -222,7 +223,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
+  margin: 10px auto 16px;
   width: 100%;
   max-width: 520px;
   justify-content: center;
@@ -238,7 +239,7 @@
   font-family: var(--font-heading);
   font-size: 28px;
   font-weight: 700;
-  color: var(--gray-900);
+  color: var(--green-800);
   letter-spacing: 8px;
   text-transform: uppercase;
   white-space: nowrap;
